@@ -15,7 +15,7 @@ project(aStarC)
 
 add_executable(${PROJECT_NAME})
 
-set(SOURCES src/main.c src/engine.c src/grid.c)
+set(SOURCES src/main.c src/engine.c src/tilemap.c)
 
 target_compile_options(${PROJECT_NAME} PRIVATE ${COMPILE_OPTIONS})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${LINK_LIBRARIES})

@@ -1,13 +1,13 @@
 #include "main.h"
 #include "engine.h"
-#include "grid.h"
+#include "tilemap.h"
 
 int main() {
   Engine engine;
   Engine_Init(&engine);
 
-  Grid grid;
-  Grid_Init(&grid, R_COUNT, C_COUNT);
+  TileMap tilemap;
+  TileMap_Init(&tilemap, R_COUNT, C_COUNT);
 
   SDL_Event e;
 
@@ -30,8 +30,10 @@ int main() {
       }
     }
 
-    SDL_FillRect(engine.canvas, NULL,
-                 SDL_MapRGB(engine.canvas->format, 0xFF, 0x0, i));
+    /* SDL_FillRect(engine.canvas, NULL, */
+    /*              SDL_MapRGB(engine.canvas->format, 0xFF, 0x0, i)); */
+
+    Engine_Draw_TileMap(&engine, &tilemap);
 
     if (i == 255) {
       i = 0;
@@ -43,7 +45,7 @@ int main() {
     usleep(16666);
   }
 
-  Grid_Drop(&grid);
+  TileMap_Drop(&tilemap);
   Engine_Drop(&engine);
 
   return 0;

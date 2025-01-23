@@ -12,8 +12,8 @@
 #include <stdint.h>
 #include <unistd.h>
 
-#define W_WIDTH 1280
-#define W_HEIGHT 720
+#define W_WIDTH 1000
+#define W_HEIGHT 1000
 
 #define R_COUNT 10
 #define C_COUNT 10

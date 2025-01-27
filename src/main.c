@@ -1,6 +1,8 @@
 #include "main.h"
 #include "engine.h"
 #include "tilemap.h"
+#include <SDL2/SDL_events.h>
+#include <stdio.h>
 
 int main() {
   Engine engine;
@@ -21,6 +23,9 @@ int main() {
         if (e.key.keysym.sym == SDLK_ESCAPE) {
           quit = true;
         }
+        break;
+      case SDL_MOUSEBUTTONDOWN:
+        printf("%d %d \n", e.button.x, e.button.y);
         break;
       case SDL_QUIT:
         quit = true;

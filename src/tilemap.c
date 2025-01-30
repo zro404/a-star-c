@@ -16,12 +16,15 @@ void TileMap_Init(TileMap *tilemap, int row_count, int col_count) {
       *TileMap_get(tilemap, i, j) = TILE_DEFAULT;
     }
   }
+
+  tilemap->has_start = false;
+  tilemap->has_stop = false;
 }
 
 TILETYPE *TileMap_get(TileMap *tilemap, int x, int y) {
   if (x < tilemap->row_count && y < tilemap->col_count) {
     TILETYPE **matrix = tilemap->matrix;
-    return &matrix[x][y];
+    return &matrix[y][x];
   }
   return NULL;
 }

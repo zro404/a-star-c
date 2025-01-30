@@ -1,8 +1,8 @@
 #include "main.h"
 #include "engine.h"
+#include "input.h"
 #include "tilemap.h"
 #include <SDL2/SDL_events.h>
-#include <stdio.h>
 
 int main() {
   Engine engine;
@@ -25,7 +25,7 @@ int main() {
         }
         break;
       case SDL_MOUSEBUTTONDOWN:
-        printf("%d %d \n", e.button.x, e.button.y);
+        Handle_Touch_Input(&tilemap, e.button.x, e.button.y);
         break;
       case SDL_QUIT:
         quit = true;

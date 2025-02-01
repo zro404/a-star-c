@@ -1,8 +1,10 @@
 #include "main.h"
 #include "engine.h"
 #include "input.h"
+#include "pathfinder.h"
 #include "tilemap.h"
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_keycode.h>
 
 int main() {
   Engine engine;
@@ -11,10 +13,12 @@ int main() {
   TileMap tilemap;
   TileMap_Init(&tilemap, R_COUNT, C_COUNT);
 
+  PathFinder pathfinder;
+  PathFinder_Init(&pathfinder);
+
   SDL_Event e;
 
-  int i = 0;
-
+  bool is_editable = true;
   bool quit = false;
   while (!quit) {
     while (SDL_PollEvent(&e)) {
@@ -22,10 +26,14 @@ int main() {
       case SDL_KEYDOWN:
         if (e.key.keysym.sym == SDLK_ESCAPE) {
           quit = true;
+        } else if (e.key.keysym.sym == SDLK_SPACE) {
+          is_editable = false;
         }
         break;
       case SDL_MOUSEBUTTONDOWN:
-        Handle_Touch_Input(&tilemap, e.button.x, e.button.y);
+        if (is_editable) {
+          Handle_Touch_Input(&tilemap, e.button.x, e.button.y);
+        }
         break;
       case SDL_QUIT:
         quit = true;
@@ -35,19 +43,14 @@ int main() {
       }
     }
 
-    /* SDL_FillRect(engine.canvas, NULL, */
-    /*              SDL_MapRGB(engine.canvas->format, 0xFF, 0x0, i)); */
+    if (!is_editable && !pathfinder.is_found) {
+      PathFinder_Tick(&pathfinder, &tilemap);
+    }
 
     Engine_Draw_TileMap(&engine, &tilemap);
 
-    if (i == 255) {
-      i = 0;
-    } else {
-      i++;
-    }
-
     SDL_UpdateWindowSurface(engine.window);
-    usleep(16666);
+    usleep(1000000 / FRAME_RATE);
   }
 
   TileMap_Drop(&tilemap);

@@ -9,13 +9,14 @@ set(COMPILE_OPTIONS ${DEBUG_COMPILE_OPTIONS} ${RELEASE_COMPILE_OPTIONS})
 set(DEBUG_LINK_LIBRARIES "$<$<CONFIG:Debug>:>")
 set(RELEASE_LINK_LIBRARIES "$<$<CONFIG:Release>:>")
 set(LINK_LIBRARIES ${DEBUG_LINK_LIBRARIES} ${RELEASE_LINK_LIBRARIES} SDL2main
-                   SDL2)
+                   SDL2 m)
 
 project(aStarC)
 
 add_executable(${PROJECT_NAME})
 
-set(SOURCES src/main.c src/engine.c src/tilemap.c src/input.c)
+set(SOURCES src/main.c src/engine.c src/tilemap.c src/input.c src/pathfinder.c
+            src/util.c)
 
 target_compile_options(${PROJECT_NAME} PRIVATE ${COMPILE_OPTIONS})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${LINK_LIBRARIES})

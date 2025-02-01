@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include <unistd.h>
 
+#define FRAME_RATE 60
+
 #define W_WIDTH 1000
 #define W_HEIGHT 1000
 

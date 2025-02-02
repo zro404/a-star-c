@@ -5,6 +5,7 @@
 #include "tilemap.h"
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keycode.h>
+#include <stdio.h>
 
 int main() {
   Engine engine;
@@ -53,8 +54,9 @@ int main() {
     usleep(1000000 / FRAME_RATE);
   }
 
-  TileMap_Drop(&tilemap);
+  PathFinder_Drop(&pathfinder);
   Engine_Drop(&engine);
+  TileMap_Drop(&tilemap);
 
   return 0;
 }

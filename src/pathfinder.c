@@ -1,139 +1,128 @@
 #include "pathfinder.h"
 #include "main.h"
 #include "tilemap.h"
+#include <stdbool.h>
 #include <stdio.h>
-
-Node Node_New(Tile tile, Node parent);
-Node NodeList_Pop(NodeList *node_list, int i);
-
-void Plot_Path(TileMap *tilemap, Node stop);
-void Update_TileMap(TileMap *tilemap, NodeList *open_list,
-                    NodeList *closed_list);
+#include <stdlib.h>
 
 void PathFinder_Init(PathFinder *pathfinder) {
   pathfinder->is_found = false;
 
   NodeList open_list;
   open_list.len = 0;
+  open_list.list = malloc(sizeof(Tile *) * C_COUNT * R_COUNT);
   pathfinder->open_list = open_list;
 
   NodeList closed_list;
   closed_list.len = 0;
+  closed_list.list = malloc(sizeof(Tile *) * C_COUNT * R_COUNT);
   pathfinder->closed_list = closed_list;
 }
 
-void PathFinder_Tick(PathFinder *pathfinder, TileMap *tilemap) {
-  NodeList *ol = &pathfinder->open_list;
-  NodeList *cl = &pathfinder->closed_list;
+void PathFinder_Tick(PathFinder *pf, TileMap *tilemap) {
+  NodeList *ol = &pf->open_list;
+  NodeList *cl = &pf->closed_list;
   if (ol->len == 0 && cl->len == 0) {
-    Node s_node = {.tile = tilemap->start, .f = 0.0f, .h = 0.0f, .g = 0.0f};
-    s_node.parent = NULL;
-    ol->list[ol->len++] = s_node;
+    ol->list[ol->len++] = tilemap->start;
   }
 
-  if (ol->len != 0) {
-    int min = 0;
-    double min_val = ol->list[0].f;
+  if (ol->len > 0) {
+    double min_val = ol->list[0]->f;
+    Tile *min;
+    int min_i;
     for (int i = 0; i < ol->len; i++) {
-      if (ol->list[i].f <= min_val) {
-        min = i;
+      if (min_val >= ol->list[i]->f) {
+        min = ol->list[i];
+        min_val = min->f;
+        min_i = i;
       }
     }
 
-    Node min_node = ol->list[min];
+    ol->list[min_i] = ol->list[ol->len - 1];
+    ol->len--;
 
-    // Expand to min's neighbors
-    Node nl[8];
-    int ni = -1;
-    Node n;
-
+    // Generate Neighbors
     for (int i = -1; i <= 1; i++) {
       for (int j = -1; j <= 1; j++) {
         if (i == 0 && j == 0)
           continue;
 
-        Tile t = min_node.tile;
+        int x = min->x + i;
+        int y = min->y + j;
 
-        int x = t.x + i;
-        int y = t.y + j;
-
-        if (x < 0 || y < 0 || x > C_COUNT || y > R_COUNT)
+        if (x < 0 || y < 0 || x >= C_COUNT || y >= R_COUNT)
           continue;
 
-        Tile nt = {x, y};
-        n = Node_New(nt, min_node);
-        n.g = min_node.g + Euclidean_Distance(t, nt);
-        n.h = Euclidean_Distance(nt, tilemap->stop);
-        n.f = n.g + n.h;
+        Tile *node = TileMap_getXY(tilemap, x, y);
 
-        nl[++ni] = n;
-      }
-    }
+        if (node->type == TILE_OBSTACLE)
+          continue;
 
-    for (int i = 0; i <= ni; i++) {
-      if (Tile_Equals(nl[i].tile, tilemap->stop)) {
-        /* Plot_Path(tilemap, nl[i]); */
-        pathfinder->is_found = true;
-        /* return; */
-        break;
-      }
+        if (node == tilemap->stop) {
+          node->parent = min;
+          while (node != NULL) {
+            if (node == tilemap->stop) {
+              node = node->parent;
+              continue;
+            }
+            node->type = TILE_PATH;
+            if (node == tilemap->start) {
+              node->type = TILE_START;
+            }
+            node = node->parent;
+          }
+          pf->is_found = true;
+          return;
+        }
 
-      for (int j = 0; j < ol->len; j++) {
-        if (Tile_Equals(nl[i].tile, ol->list[j].tile)) {
-          if (nl[i].f > ol->list[j].f) {
-            continue;
+        double f, h, g = 0;
+        if (node->parent) {
+          g = node->parent->g + Euclidean_Distance(node, node->parent);
+        }
+        h = Euclidean_Distance(node, tilemap->stop);
+        f = g + h;
+
+        bool skip = false;
+        for (int k = 0; k < ol->len; k++) {
+          if (node == ol->list[k]) {
+            if (f > ol->list[k]->f) {
+              skip = true;
+              break;
+            }
           }
         }
-      }
+        if (skip)
+          continue;
 
-      for (int j = 0; j < cl->len; j++) {
-        if (Tile_Equals(nl[i].tile, cl->list[j].tile)) {
-          if (nl[i].f < cl->list[j].f) {
-            cl->list[j] = nl[i];
-            continue;
+        for (int k = 0; k < cl->len; k++) {
+          if (node == cl->list[k]) {
+            if (f > cl->list[k]->f) {
+              skip = true;
+              break;
+            }
           }
         }
+        if (skip)
+          continue;
+
+        node->f = f;
+        node->g = g;
+        node->h = h;
+        node->parent = min;
+        ol->list[ol->len++] = node;
+        if (node != tilemap->start) {
+          node->type = TILE_OPEN;
+        }
       }
-
-      ol->list[ol->len++] = nl[i];
     }
-
-    cl->list[cl->len++] = NodeList_Pop(ol, min);
-
-    Update_TileMap(tilemap, ol, cl);
+    cl->list[cl->len++] = min;
+    if (min != tilemap->start) {
+      min->type = TILE_CLOSED;
+    }
   }
 }
 
-void Update_TileMap(TileMap *tilemap, NodeList *open_list,
-                    NodeList *closed_list) {
-  for (int i = 0; i < open_list->len; i++) {
-    *TileMap_getTile(tilemap, &open_list->list[i].tile) = TILE_OPEN;
-  }
-
-  for (int i = 0; i < closed_list->len; i++) {
-    *TileMap_getTile(tilemap, &closed_list->list[i].tile) = TILE_CLOSED;
-  }
-}
-
-// BUG
-void Plot_Path(TileMap *tilemap, Node stop) {
-  Node *node = &stop;
-  while (node->parent != NULL) {
-    *TileMap_getTile(tilemap, &node->tile) = TILE_PATH;
-    node = node->parent;
-  }
-}
-
-Node Node_New(Tile tile, Node parent) {
-  Node node = {
-      tile, 0.0f, 0.0f, 0.0f, &parent,
-  };
-  return node;
-}
-
-Node NodeList_Pop(NodeList *node_list, int i) {
-  Node n = node_list->list[i];
-  node_list->list[i] = node_list->list[node_list->len - 1];
-  node_list->len--;
-  return n;
+void PathFinder_Drop(PathFinder *pathfinder) {
+  free(pathfinder->open_list.list);
+  free(pathfinder->closed_list.list);
 }

@@ -41,7 +41,7 @@ void Engine_Draw_TileMap(Engine *engine, TileMap *tilemap) {
   for (int i = 0; i < tilemap->row_count; i++) {
     for (int j = 0; j < tilemap->col_count; j++) {
       SDL_FillRect(engine->canvas, &border_rect, 0x000000);
-      SDL_FillRect(engine->canvas, &tile_rect, tilemap->matrix[i][j]);
+      SDL_FillRect(engine->canvas, &tile_rect, tilemap->matrix[i][j].type);
       tile_rect.x += tile_rect.w + PADDING;
       border_rect.x += border_rect.w;
     }

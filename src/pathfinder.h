@@ -5,14 +5,8 @@
 #include "tilemap.h"
 #include <stdbool.h>
 
-typedef struct Node_T {
-  Tile tile;
-  double f, g, h;
-  struct Node_T *parent;
-} Node;
-
 typedef struct {
-  Node list[C_COUNT * R_COUNT];
+  Tile **list;
   int len;
 } NodeList;
 
@@ -24,5 +18,6 @@ typedef struct {
 
 void PathFinder_Init(PathFinder *pathfinder);
 void PathFinder_Tick(PathFinder *pathfinder, TileMap *tilemap);
+void PathFinder_Drop(PathFinder *pathfinder);
 
 #endif // PATHFINDER_H_

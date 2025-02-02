@@ -4,13 +4,13 @@
 #include <stdbool.h>
 
 typedef enum {
-  TILE_PATH = 0xff00ff,
-  TILE_CLOSED = 0x0000ff,
-  TILE_OPEN = 0xffff00,
-  TILE_START = 0x00ff00,
-  TILE_STOP = 0xff0000,
-  TILE_DEFAULT = 0xffffff,
+  TILE_DEFAULT = 0xf5f5f5,
   TILE_OBSTACLE = 0x000000,
+  TILE_START = 0x32a852,
+  TILE_STOP = 0xa8324c,
+  TILE_OPEN = 0xd7d957,
+  TILE_CLOSED = 0x3267a8,
+  TILE_PATH = 0xde4ecf,
 } TILETYPE;
 
 typedef struct Tile_T {
